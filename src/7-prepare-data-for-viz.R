@@ -10,8 +10,7 @@ devtools::source_gist("32e9aa2a971c6d2682ea8d6af5eb5cde")
 # prepare session
 source(lp("src/0-prepare-session.R"))
 
-
-
+# country names and codes
 load("dat/ids.rda" %>% lp)
 
 # decomp ------------------------------------------------------------------
@@ -45,9 +44,10 @@ df <- decomp %>%
 save(df, file = "dat/gap33cntrs.rda" %>% lp, compress = "xz")
 
 
+# 6 age groups -- 1, 15, 40, 60, 80
+
 load("dat/gap33cntrs.rda" %>% lp)
 
-# 6 age groups -- 1, 15, 40, 60, 80
 df6 <- df %>% 
     mutate(
         age_group = age %>% 
@@ -72,8 +72,10 @@ save(df6, file = "dat/a6gap33cntrs.rda" %>% lp, compress = "xz")
 
 # qx ----------------------------------------------------------------------
 
+load("dat/lt33.rda" %>% lp)
+
 # life table qx
-df4qx <- lt1x1 %>%
+df4qx <- lt33 %>%
     filter(
         country %>% is_in(c("SWE", "USA", "JPN", "RUS")),
         sex %>% is_in("b") %>% not,
@@ -103,27 +105,8 @@ save(df4qx, file = "dat/df4qx.rda" %>% lp)
 
 # qx sex difference,scaled gap, and ratio
 # prepare the death rates and diff df
-qxdiff <- lt1x1 %>% 
-    select(1:4, 6) %>% 
-    filter(age %>% is_less_than(96)) %>% 
-    mutate(
-        age_group = age %>% 
-            cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE) %>% 
-            str_replace(",", "-") %>% 
-            as_factor() %>% 
-            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
-    ) %>% 
-    pivot_wider(names_from = sex, values_from = qx) %>% 
-    mutate(gap = m - f,
-           scaled = (m - f)/f,
-           ratio = m/f)
-
-save(qxdiff, file = "data/qxdiff.rda" %>% lp)
-
-# qx sex difference,scaled gap, and ratio
-# prepare the death rates and diff df
-qxdiff <- lt1x1 %>% 
-    select(1:4, 6) %>% 
+qxdiff <- lt33 %>% 
+    select(country, name, nyrs, sex, year, age, qx) %>% 
     filter(age %>% is_less_than(96)) %>% 
     mutate(
         age_group = age %>% 
@@ -142,6 +125,7 @@ save(qxdiff, file = "dat/qxdiff.rda" %>% lp)
 
 
 # data for sens plateau 0.7 -----------------------------------------------
+
 load("dat/decomp.rda" %>% lp)
 load("dat/decomp_de_07.rda" %>% lp)
 
@@ -177,8 +161,44 @@ df_plateau <- decomp %>%
 save(df_plateau, file = "dat/df_plateau.rda" %>% lp)
 
 
+# appendix seven -- sensitivity check for age boundary 50 vs 40 ------------
 
-# decomp changes in the sex gap -------------------------------------------
+load("dat/gap33cntrs.rda" %>% lp)
+
+df40 <- df %>% 
+    mutate(age_group = age %>% 
+               cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE)) %>% 
+    group_by(country, name, row, column, year, age_group) %>% 
+    summarise(ctb = ctb %>% sum(na.rm = T),
+              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
+    ungroup() %>% 
+    # relevel age_group factor
+    mutate(
+        age_group = age_group %>% 
+            str_replace(",", "-") %>% 
+            as_factor() %>% 
+            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
+    )
+
+df50 <- df %>% 
+    mutate(age_group = age %>% 
+               cut(c(0, 1, 15, 50, 60, 80, 111), right = FALSE)) %>% 
+    group_by(country, name, row, column, year, age_group) %>% 
+    summarise(ctb = ctb %>% sum(na.rm = T),
+              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
+    ungroup() %>% 
+    # relevel age_group factor
+    mutate(
+        age_group = age_group %>% 
+            str_replace(",", "-") %>% 
+            as_factor() %>% 
+            lvls_revalue(c("0", "1-14", "15-49", "50-59", "60-79", "80+"))
+    )
+
+save(df40, df50, file = "dat/df_40_50.rda" %>% lp)
+
+
+# appendix eight -- decomp changes in the sex gap ----------------
 
 load("dat/gap_decomp.rda" %>% lp)
 load("dat/years_max_gap.rda" %>% lp)

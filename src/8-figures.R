@@ -1,12 +1,8 @@
 #===============================================================================
-# 2020-02-18 -- sex gap e0
-# Final plots -- submission of the manuscripts
+# 2021-03-15 -- sex gap e0
+# Final plots
 # Ilya Kashnitsky, ilya.kashnitsky@gmail.com
 #===============================================================================
-# UPD  2020-04-03 ------------------------------
-# "Probability of death" where possible, "Risk" on vertical axes
-# UPD  2020-09-09 ------------------------------
-# - new age categories "0", "1-14", "15-39", "40-59", "60-79", "80+"
 
 # function to localize paths
 devtools::source_gist("32e9aa2a971c6d2682ea8d6af5eb5cde")
@@ -15,7 +11,7 @@ source(lp("src/0-prepare-session.R"))
 
 
 # theme -------------------------------------------------------------------
-load("dat/palettes.rda")
+load("dat/palettes.rda" %>% lp)
 
 theme_custom <- theme_minimal(base_family = font_rc) +
     theme(
@@ -28,9 +24,9 @@ theme_custom <- theme_minimal(base_family = font_rc) +
     )
 
 
-load("dat/a6gap33cntrs.rda")
 
 # Fig 1 -- RELATIVE ----------------------------------
+load("dat/a6gap33cntrs.rda" %>% lp)
 
 # relative
 df6 %>% 
@@ -57,7 +53,6 @@ df6 %>%
     ) +
     theme_minimal(base_family = font_rc, base_size = 20) +
     theme(
-        # legend.position = "bottom",
         legend.position = c(.6, .5),
         strip.background = element_blank(),
         strip.text = element_blank(),
@@ -81,12 +76,6 @@ df6 %>%
 one_outer <- last_plot()
 
 
-
-
-# plot qx
-load("dat/lt1x1.rda")
-
-
 # plot ratio
 load("dat/df4qx.rda" %>% lp)
 
@@ -94,7 +83,6 @@ df4qx %>%
     pivot_wider(names_from = sex, values_from = qx) %>% 
     ggplot(aes(age, y = m/f, color = country))+
     geom_hline(yintercept = 1, color = "gray25",  size = .5)+
-    # geom_point(shape = 16, size = .5)+
     geom_smooth(se = F, size = 1, color = "#ffffff", span = .25)+
     geom_smooth(se = F, size = .5, span = .25)+
     scale_x_continuous(breaks = c(0, 15, 40, 60, 80))+
@@ -111,7 +99,6 @@ df4qx %>%
         panel.grid.minor = element_blank()
     )+
     labs(
-        # y = bquote(q[x]^male / q[x]^female ~", log scale"),
         y = "Sex ratio, log scale",
         x = "Age"
     )+
@@ -184,82 +171,11 @@ df4qx %>%
           legend.text = element_text(size = 16),
           panel.grid.minor = element_blank())+
     labs(
-        # y = bquote(q[x]^male - q[x]^female ~", log scale"),
         y = "Sex gap, log scale",
         x = "Age"
     )
 
 one_c <- last_plot()
-
-# UPD  2020-09-09 ------------------------------
-# REMOVE 1D
-
-# # plot log log qx vs qx gap for the US only
-# lt1x1 %>% 
-#     filter(country %>% is_in(c("USA")),
-#            year %>% is_in(2012:2016), 
-#            age %>% is_less_than(96)) %>% 
-#     group_by(age, sex) %>% 
-#     summarise(qx = qx %>% mean, na.rm = T) %>% 
-#     ungroup() %>% 
-#     pivot_wider(names_from = sex, values_from = qx) %>% 
-#     # add 6 colored age groups
-#     mutate(age_group = age %>% 
-#                cut(c(0, 1, 15, 40, 65, 85, 111), right = FALSE) %>% 
-#                str_replace(",", "-") %>% 
-#                str_remove("\\[") %>% 
-#                str_remove("\\)") %>% 
-#                str_replace("-111", "+") %>% 
-#                as_factor() %>% 
-#                fct_relevel("15-40", after = 0),
-#            size = ifelse(age_group %>% is_in("15-40"), 1.25, .75),
-#            shape = ifelse(age_group %>% is_in("15-40"), 16, 21)) %>% 
-#     ggplot(aes(f, (m-f)))+
-#     geom_abline(slope = 1, size = 1, color = "#ffffff")+
-#     geom_abline(slope = 1, size = .5, color = "grey25")+
-#     geom_path(aes(color = age_group), size = .2)+
-#     geom_point(aes(color = age_group, size = size, shape = shape), fill = "#ffffff")+
-#     scale_x_continuous(
-#         trans = "log", 
-#         breaks = c(.0001, .001, .01, .05),
-#         labels = c(.0001, .001, .01, .05) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_y_continuous(
-#         trans = "log", 
-#         breaks = c(.0001, .001, .01, .05),
-#         labels = c(.0001, .001, .01, .05) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_color_manual(
-#         guide  = guide_legend(ncol = 1),
-#         values = pal_six
-#     ) +
-#     scale_size_identity()+
-#     scale_shape_identity()+
-#     labs(x = "Female probability\nof death, log scale",
-#          y = "Sex gap, log scale",
-#          color = "Age group")+
-#     theme_minimal(base_family = font_rc, base_size = 16)+
-#     theme(
-#         legend.position = c(.88, .42),
-#         legend.spacing.x = unit(.1, "line"),
-#         legend.key.height = unit(1, "line"),
-#         legend.text = element_text(size = 14),
-#         panel.grid.minor = element_blank()
-#     )+
-#     annotate(
-#         "text", label = "USA",
-#         x = 1e-4, y = .05, size = 9, color = pal_four[2],
-#         hjust = 0, vjust = 1, family = font_rc, fontface = 2
-#     )+
-#     annotate(
-#         "text", x = 4e-3, y = 4e-5, 
-#         label = "2012-16 avg",
-#         size = 7, color = "grey50", alpha = .5,
-#         hjust = .5, vjust = 1, family = font_rc, fontface = 2
-#     )
-# 
-# 
-# one_d <- last_plot()
 
 
 # arrange and save
@@ -267,7 +183,6 @@ blank <- ggplot(tibble(x = 1, y = 1), aes(x, y))+
     geom_rect(xmin = -Inf, xmax = Inf,
               ymin = -Inf, ymax = Inf,
               fill = "#ffffff",
-              # fill = "red",
               color = NA)+
     theme_void()
 
@@ -281,7 +196,6 @@ one <- ggdraw() +
     draw_plot(one_a, x = 0, y = .66, width = .33, height = .33)+
     draw_plot(one_c, x = .34, y = .66, width = .33, height = .33)+
     draw_plot(one_b, x = 0, y = 0.35, width = .33, height = .33)+
-    # draw_plot(one_d, x = .32, y = 0.33, width = .3, height = .32)+
     # annotate plot letters
     draw_text(
         LETTERS[c(1,3,2,4)],  
@@ -292,8 +206,8 @@ one <- ggdraw() +
     )
 
 ggsave(
-    filename = "out/main-one.png" %>% lp, plot = one, 
-    width = 10, height = 10, 
+    filename = "out/main-one.png" %>% lp, 
+    plot = one, width = 10, height = 10, 
     type = "cairo-png"
 )
 
@@ -406,25 +320,19 @@ df4qx_ts %>%
         y = "Sex gap",
         x =  "Year"
     )+
-    # annotate(
-    #     "text", x = 1875, y = .037, 
-    #     label = "Age 0",
-    #     size = 8.5, color = "grey50", alpha = .5,
-    #     hjust = .5, vjust = 1, 
-    #     family = font_rc, fontface = 2
-    # )+
     annotate(
         "text", x = 1860, y = .035, 
-        label = "Sex gap in probability\nof death at age 0",
+        label = "Sex gap in infant\nmortality rate",
         size = 7, color = "black", hjust = 0, vjust = 1, 
         family = font_rc, lineheight = .9
     )
 
 two_a <- last_plot()
 
-load("dat/qxdiff.rda" %>% lp)
 
 # IMR Female VS Diff -- log log + normalization
+load("dat/qxdiff.rda" %>% lp)
+
 qxdiff %>% 
     filter(country %>% is_in(c("SWE")),
            age %>% equals(0)) %>% 
@@ -445,17 +353,10 @@ qxdiff %>%
                              maxf = f %>% max),
                  aes(x = minf, xend = maxf, y = avg, yend = avg),
                  size = 1, color = "#A14500")+
-    annotate("text", label = "Mean for\n1900–2017\nis 1.27",
+    annotate("text", label = "Mean for\n1900–2019\nis 1.26",
              x = .009, y = 1.17, hjust = 0, vjust = 1, 
              size = 4.5,  color =  "#A14500", 
              family = font_rc, lineheight = .9)+
-    # # average mark for each period
-    # geom_point(data = . %>% 
-    #                group_by(col_year) %>% 
-    #                summarise(ratio = ratio %>% mean(na.rm=T),
-    #                          f  = f %>% mean(na.rm=T)) %>% 
-    #                ungroup(),
-    #            size = 15, shape = 95)+
     scale_x_continuous(
         trans = "log", 
         breaks = c(.0001, .001, .01, .1, .25),
@@ -491,7 +392,6 @@ two_b <- last_plot()
 
 
 
-
 # probability of duying between 15 and 40
 
 lt1x1 %>%
@@ -513,7 +413,6 @@ lt1x1 %>%
         breaks = c(1750, 1800, 1850, 1900, 1950, 1975, 2000),
         labels = c("1750", "1800", "1850", "1900", "1950", "'75", "2000")
     )+
-    # facet_wrap(~country, ncol = 2)+
     theme_minimal(base_family = font_rc, base_size = 16)+
     theme(legend.position = "none",
           strip.text = element_blank(),
@@ -524,7 +423,7 @@ lt1x1 %>%
     )+
     annotate(
         "text", x = 1800, y = .19, 
-        label = "Sex gap in probability of death\nfrom age 15 to age 40",
+        label = "Sex gap in probability of death\nat ages 15-39",
         size = 7, color = "black", hjust = 0, vjust = 1, 
         family = font_rc, lineheight = .9
     )
@@ -589,7 +488,6 @@ two_ad <- ggdraw() +
     draw_plot(two_a, x = 0, y = .59, width = .35, height = .4)+
     draw_plot(two_b, x = .36, y = .59, width = .33, height = .4)+
     draw_plot(two_c, x = 0, y = 0.25, width = .5, height = .33)+
-    # draw_plot(two_e, x = 0, y = 0, width = 1, height = -.3)+
     # annotate plot letters
     draw_text(
         LETTERS[1:4],  
@@ -614,8 +512,8 @@ two <- ggdraw() +
     )
 
 ggsave(
-    filename = "out/main-two.png" %>% lp, two, 
-    width = 10, height = 14, 
+    filename = "out/main-two.png" %>% lp, 
+    two, width = 10, height = 14, 
     type = "cairo-png"
 )
 
@@ -680,7 +578,6 @@ ggsave(
 
 # B -- 1960
 lt33 %>%
-    # filter out last available year
     group_by(sex, country, age) %>% 
     filter(year == 1960,
            age %>% is_less_than(96)) %>% 
@@ -730,7 +627,6 @@ ggsave(
 
 # C -- 1900 for the available populations
 lt33 %>%
-    # filter out first available year
     group_by(sex, country, age) %>% 
     filter(year == 1900,
            age %>% is_less_than(96)) %>% 
@@ -782,275 +678,54 @@ ggsave(
 
 # appendix two ------------------------------------------------------------
 
-# the following plots go to appendix
-# male and female qx
-df4qx %>% 
-    pivot_wider(names_from = sex, values_from = qx) %>%
-    ggplot(aes(age, color = country))+
-    geom_path(aes(y = m), size = .5)+
-    geom_path(aes(y = f), size = .1)+
-    geom_ribbon(aes(ymin = m, ymax = f, fill = country), alpha = .25, 
-                color = NA)+
-    scale_color_manual(NULL, values = pal_four)+
-    scale_fill_manual(NULL, values = pal_four)+
-    scale_x_continuous(breaks = c(0, 15, 40, 60, 80))+
-    scale_y_continuous(
-        breaks = seq(0, .3, .1),
-        labels = seq(0, .3, .1) %>% paste %>% str_replace("0.", ".")
-    )+
-    facet_wrap(~country, ncol = 2)+
-    theme_minimal(base_family = font_rc, base_size = 16)+
-    theme(legend.position = "none",
-          strip.text = element_blank(),
-          panel.grid.minor = element_blank())+
-    labs(
-        y = "Probability of death",
-        x = "Age"
-    )+
-    # label countries
-    geom_text(data = . %>% select(country) %>%  distinct(),
-              aes(label = country, color = country), 
-              x = 0, y = .27, size = 7, fontface = 2,
-              hjust = 0, vjust = 1, 
-              family = font_rc)
+# Fig 3C for all countries
+save(qxdiff, file = "dat/qxdiff.rda" %>% lp)
 
-two_app_a <- last_plot()
-
-
-# male and female qx -- LOG SCALE
-df4qx %>% 
-    pivot_wider(names_from = sex, values_from = qx) %>% 
-    ggplot(aes(age, color = country))+
-    geom_path(aes(y = m), size = .5)+
-    geom_path(aes(y = f), size = .1)+
-    geom_ribbon(aes(ymin = m, ymax = f, fill = country), alpha = .25, 
-                color = NA)+
+qxdiff %>%
+    # filter out last available year
+    group_by(name, age) %>% 
+    filter(year == year %>% last(),
+           age %>% is_less_than(96)) %>% 
+    ungroup() %>% 
+    # plot
+    ggplot(aes(age, y = gap))+
+    geom_hline(yintercept = 1, color = "gray25",  size = .5)+
+    geom_smooth(data = . %>% select(-name), aes(group = country), se = F, 
+                span = .25,
+                size = .25, color = "grey75")+
+    geom_point(shape = 1, size = 1, color = "#003737FF")+
+    geom_smooth(se = F, size = 1, color = "#ffffff", span = .25)+
+    geom_smooth(se = F, size = .5, color = "#003737FF", span = .25)+
+    geom_text(aes(label = year), x = 47.5, y = -.1, 
+              size = 4, color = "grey75",
+              vjust = 1, fontface = 2)+
     scale_x_continuous(breaks = c(0, 15, 40, 60, 80))+
     scale_y_continuous(
         trans = "log",
-        breaks = c(.0001, .001, .01, .1, .5),
-        labels = c(.0001, .001, .01, .1, .5) %>% paste %>% 
-            str_replace("0.", "."),
-        limits = c(9e-6, .5)
+        breaks = c(.0001, .001, .01, .05),
+        labels = c(.0001, .001, .01, .05) %>% paste %>% str_replace("0.", "."),
+        limits = c(9e-6, .1)
     )+
-    scale_color_manual(NULL, values = pal_four)+
-    scale_fill_manual(NULL, values = pal_four)+
-    facet_wrap(~country, ncol = 2)+
+    scale_color_manual(NULL, values = pal_six)+
+    facet_wrap(~name, ncol = 5, dir = "v")+
     theme_minimal(base_family = font_rc, base_size = 16)+
-    theme(legend.position = "none",
-          strip.text = element_blank(),
-          panel.grid.minor = element_blank())+
-    labs(
-        y = "Probability of death,\nlog scale",
-        x = "Age"
+    theme(
+        legend.position = "bottom",
+        panel.grid.minor = element_blank()
     )+
-    # label sexes
-    geom_text(
-        data = tibble(
-            country = "Russia" %>% 
-                factor(
-                    levels = c("France", "Japan", "USA", "Russia")
-                ),
-            sex = c("Female", "Male"),
-            ypos = c(4e-4, 5e-3),
-            xpos = c(45, 20),
-            fontface = c(1, 2)
-        ),
-        aes(label = sex, x = xpos, y = ypos, 
-            color = country, fontface = fontface), 
-        size = 5, 
-        hjust = 0, vjust = 0, angle = 30, 
-        family = font_rc
+    labs(
+        y = "Sex gap, log scale",
+        x = "Age",
+        title = "Sex gap in probability of death, last available year" 
     )
 
-two_app_b <- last_plot()
-
-
-two_app <- two_app_a + two_app_b + 
-    plot_annotation(
-        # title = "Age profiles of death risk",
-        tag_levels = "A",
-        theme = theme(
-            text = element_text(family = font_rc, size = 15)
-        )
-    )
+two_app <- last_plot()
 
 ggsave(
     filename = "out/appendix-2.png" %>% lp, 
-    two_app, width = 7, height = 4,
+    two_app, width = 8, height = 10,
     type = "cairo-png"
 )
-
-
-# # appendix three ----------------------------------------------------------
-# # UPD  2020-09-09 ------------------------------
-# # REMOVE A3
-# 
-# load("data/qxdiff.rda")
-# 
-# # plot log log qx vs qx gap for the four countries and years 1960, 1990, last
-# qxdiff %>% 
-#     filter(
-#         country %>% is_in(c("SWE", "USA", "JPN", "RUS")),
-#         year == 2017 & country == "SWE" | 
-#             year == 2016 & country == "USA" |
-#             year == 2016 & country == "JPN"|
-#             year == 2014 & country == "RUS" |
-#             year %>% is_in(c(1960, 1990)),
-#         age %>% is_less_than(96) & country != "RUS" |
-#             age %>% is_less_than(86) & country == "RUS"
-#     ) %>%
-#     mutate(year = year %>% as_factor() %>% 
-#                fct_other(keep = c("1960", "1990"), other_level = "Last")) %>% 
-#     # rename and reorder countries
-#     mutate(
-#         country = country %>% as_factor() %>% 
-#             fct_recode(
-#                 Sweden = "SWE",
-#                 Japan = "JPN",
-#                 Russia = "RUS"
-#             ) %>% 
-#             # re-order  to match the outer plot
-#             fct_relevel("USA", after = 0) %>% 
-#             fct_relevel("Sweden", after = 0)
-#     ) %>% 
-#     arrange(country, age) %>% 
-#     ggplot(aes(f, gap))+
-#     geom_point(aes(color = age_group))+
-#     geom_path(aes(color = age_group), size = .2)+
-#     geom_abline(slope = 1, size = 1, color = "#ffffff")+
-#     geom_abline(slope = 1, size = .5, color = "grey25")+
-#     scale_x_continuous(
-#         trans = "log", 
-#         breaks = c(.0001, .001, .01, .05),
-#         labels = c(.0001, .001, .01, .05) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_y_continuous(
-#         trans = "log", 
-#         breaks = c(.0001, .001, .01, .05),
-#         labels = c(.0001, .001, .01, .05) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     facet_grid(country~year)+
-#     coord_fixed()+
-#     scale_color_manual(
-#         guide  = guide_legend(nrow = 1),
-#         values = pal_six
-#     ) +
-#     labs(x = "Female probability of death, log scale",
-#          y = "Sex gap in probability of death, log scale",
-#          color = "Age group")+
-#     theme_minimal(base_family = font_rc, base_size = 16)+
-#     theme(
-#         legend.position = "bottom",
-#         legend.spacing.x = unit(.1, "line"),
-#         legend.key.height = unit(1, "line"),
-#         legend.text = element_text(size = 14),
-#         panel.grid.minor = element_blank()
-#     )
-# 
-# 
-# three_app <- last_plot()
-# 
-# ggsave(filename = "out/appendix-3.png", 
-#        three_app, width = 7, height = 9)
-# 
-
-# # appendix three -----------------------------------------------------------
-# # UPD  2020-09-15 ------------------------------
-# # Remove appendix 3 (before 4)
-# 
-# # sex gap in IMR vs female IMR
-# 
-# 
-# # linear scales
-# qxdiff %>% 
-#     filter(country %>% is_in(c("SWE")),
-#            age %>% equals(0)) %>% 
-#     mutate(col_year = year %>% 
-#                cut(seq(1750, 2050, 50), right = FALSE) %>% 
-#                lvls_revalue(
-#                    paste0(
-#                        seq(1750, 2000, 50), "-", c(99, 49, 99, 49, 99, 17)
-#                    )
-#                )) %>% 
-#     ggplot(aes(f, gap, color = col_year))+
-#     geom_point()+
-#     scale_y_continuous(
-#         breaks = seq(0, .03, .01),
-#         labels = seq(0, .03, .01) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_x_continuous(
-#         breaks = seq(0, .25, .05),
-#         labels = seq(0, .25, .05) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_color_viridis_d(end = .97, 
-#                           guide  = guide_legend(nrow = 1, reverse = TRUE,
-#                                                 override.aes = list(size=5)))+
-#     theme_minimal(base_family = font_rc, base_size = 16)+
-#     theme(
-#         legend.position = "bottom",
-#         legend.spacing.x = unit(1, "line"),
-#         legend.text = element_text(size = 20),
-#         panel.grid.minor = element_blank()
-#     )+
-#     labs(
-#         color = NULL,
-#         x = "Female IMR",
-#         y = "Sex gap in IMR"
-#     )
-# 
-# imr_lin <- last_plot()
-# 
-# 
-# # log log
-# qxdiff %>% 
-#     filter(country %>% is_in(c("SWE")),
-#            age %>% equals(0)) %>% 
-#     mutate(col_year = year %>% 
-#                cut(seq(1750, 2050, 50), right = FALSE) %>% 
-#                lvls_revalue(
-#                    paste0(
-#                        seq(1750, 2000, 50), "-", c(99, 49, 99, 49, 99, 17)
-#                    )
-#                )) %>% 
-#     ggplot(aes(f, gap, color = col_year))+
-#     geom_point()+
-#     scale_x_continuous(
-#         trans = "log", 
-#         breaks = c(.0001, .001, .01, .1, .25),
-#         labels = c(.0001, .001, .01,  .1, .25) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_y_continuous(
-#         trans = "log", 
-#         breaks = c(.0001, .001, .01, .05),
-#         labels = c(.0001, .001, .01, .05) %>% paste %>% str_replace("0.", ".")
-#     )+
-#     scale_color_viridis_d(end = .97, 
-#                           guide  = guide_legend(nrow = 1, reverse = TRUE,
-#                                                 override.aes = list(size=5)))+
-#     theme_minimal(base_family = font_rc, base_size = 16)+
-#     theme(
-#         legend.position = "bottom",
-#         legend.spacing.x = unit(1, "line"),
-#         legend.text = element_text(size = 20),
-#         panel.grid.minor = element_blank()
-#     )+
-#     labs(
-#         color = NULL,
-#         x = "Female IMR, log scale",
-#         y = "Sex gap in IMR, log scale"
-#     )
-# 
-# imr_log <- last_plot()    
-# 
-# 
-# imr <- (imr_lin + imr_log) / guide_area() + 
-#     plot_layout(ncol = 1, guides = "collect", heights = c(5,1))+
-#     plot_annotation(title = "Infant mortality rate, Sweden",
-#                     theme = theme(plot.title = element_text(family = font_rc, size = 20)), caption = "A")
-# 
-# ggsave(filename = "out/appendix-3.png", imr, 
-#        width = 10, height = 5)
 
 
 
@@ -1099,7 +774,6 @@ ggsave(
 
 # appendix four ------------------------------------------------------------
 
-
 # absolute, 33 countries, 6 age groups 
 df6 %>% 
     ggplot()+
@@ -1140,7 +814,6 @@ ggsave(
 
 
 # appendix five ----------------------------------------------------------
-
 
 # lexis surface
 load("dat/gap33cntrs.rda" %>% lp)
@@ -1210,10 +883,9 @@ ggsave(
 
 
 
+# appendix six -- palteau 0.7 --------------------------------------------
 
-# appendix six -- palteu 0.7 --------------------------------------------
-
-load("dat/df_plateau.rda" %>% lp) # data is just for the EU
+load("dat/df_plateau.rda" %>% lp) # data is just for the Germany
 
 # absolute plot
 df_plateau %>% 
@@ -1238,46 +910,19 @@ df_plateau %>%
          title = "Age-specific contribution to sex gap in life expectancy at birth",
          subtitle = "Comparison of the two assumptions of plateau level, Germany")
 
-ggsave("out/appendix-6.png", width = 6, height = 4.5)
+six_app <- last_plot()
+
+ggsave(
+    "out/appendix-6.png" %>% lp, 
+    six_app, width = 6, height = 4.5,
+    type = "cairo-png"
+)
 
 
 
 # appendix seven -- sensitivity check for age boundary 50 vs 40 ------------
+load("dat/df_40_50.rda" %>% lp)
 
-# 6 age groups -- 1, 15, 50, 60, 80
-
-df40 <- df %>% 
-    mutate(age_group = age %>% 
-               cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE)) %>% 
-    group_by(country, name, row, column, year, age_group) %>% 
-    summarise(ctb = ctb %>% sum(na.rm = T),
-              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
-    ungroup() %>% 
-    # relevel age_group factor
-    mutate(
-        age_group = age_group %>% 
-            str_replace(",", "-") %>% 
-            as_factor() %>% 
-            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
-    )
-
-df50 <- df %>% 
-    mutate(age_group = age %>% 
-               cut(c(0, 1, 15, 50, 60, 80, 111), right = FALSE)) %>% 
-    group_by(country, name, row, column, year, age_group) %>% 
-    summarise(ctb = ctb %>% sum(na.rm = T),
-              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
-    ungroup() %>% 
-    # relevel age_group factor
-    mutate(
-        age_group = age_group %>% 
-            str_replace(",", "-") %>% 
-            as_factor() %>% 
-            lvls_revalue(c("0", "1-14", "15-49", "50-59", "60-79", "80+"))
-    )
-
-
-# compare just 15-40 VS 15-50 lines
 df40 %>% ggplot()+
     geom_path(data = df40 %>% 
                   filter(age_group %>% is_in(c("15-39"))) %>% 
@@ -1297,7 +942,7 @@ df40 %>% ggplot()+
               aes(year, avg_ctb_rel, color = age_group), size = 1)+
     geom_hline(yintercept = 0, color = "#666666", size = .5)+
     facet_grid(row~column, scales = "free_x", space="free")+
-    coord_cartesian(ylim = c(-1, 4), expand = FALSE)+
+    coord_cartesian(ylim = c(-3.5, 4), expand = FALSE)+
     scale_x_continuous(breaks = seq(1800, 2000, 50))+
     scale_color_manual(values = c("#003737FF", "#3FB3F7FF"), 
                        guide  = guide_legend(nrow = 1))+
@@ -1327,7 +972,6 @@ ggsave(
     seven_app, width = 8, height = 10,
     type = "cairo-png"
 )
-
 
 
 
@@ -1379,8 +1023,3 @@ ggsave(
     eight_app, width = 8, height = 10,
     type = "cairo-png"
 )
-
-
-
-
-

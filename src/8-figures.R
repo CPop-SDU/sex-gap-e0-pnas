@@ -883,7 +883,58 @@ ggsave(
 
 
 
-# appendix six -- palteau 0.7 --------------------------------------------
+# appendix six -- change of gap decomposition ---------------------------
+
+load("dat/df_gap_decomp.rda" %>% lp)
+
+df_gap_decomp %>% 
+    ggplot(aes(ctb, age_group))+
+    geom_vline(
+        xintercept = 0, size = .5, color = "#999999"
+    )+
+    geom_text(
+        data = . %>% filter(period == "early"),
+        aes(label = year_label %>% str_wrap(5), color = period), 
+        family = font_rc, fontface = 2,
+        x = 1.5, y = 1.75, size = 4, lineheight = .9, alpha = .1
+    )+
+    geom_text(
+        data = . %>% filter(period == "late"),
+        aes(label = year_label %>% str_wrap(5), color = period), 
+        family = font_rc, fontface = 2,
+        x = -1.5, y = 1.75, size = 4, lineheight = .9, alpha = .1
+    )+
+    geom_col(
+        aes(fill = period, color = period),
+        stat="identity", position="dodge", color = NA, width =.5
+    )+
+    facet_wrap(~name, ncol = 5, dir = "v")+
+    scale_fill_manual(values = c("#003737FF", "#3FB3F7FF"))+
+    scale_color_manual(values = c("#003737FF", "#3FB3F7FF"))+
+    theme_minimal(base_family = font_rc, base_size = 14)+
+    theme(
+        legend.position = "none",
+        panel.grid.minor =  element_blank(),
+        panel.grid.major =  element_line(size = .1),
+        panel.ontop = T
+    )+
+    labs(
+        y = "Age group, years",
+        x = "Absolute contribution, years",
+        title = "Age-specific contributions to the change in the sex gap in life expectancy at birth" %>% str_wrap(60)
+    )
+
+six_app <- last_plot()
+
+ggsave(
+    "out/appendix-6.png" %>% lp, 
+    six, width = 8, height = 10,
+    type = "cairo-png"
+)
+
+
+
+# appendix seven -- palteau 0.7 --------------------------------------------
 
 load("dat/df_plateau.rda" %>% lp) # data is just for the Germany
 
@@ -910,17 +961,17 @@ df_plateau %>%
          title = "Age-specific contribution to sex gap in life expectancy at birth",
          subtitle = "Comparison of the two assumptions of plateau level, Germany")
 
-six_app <- last_plot()
+seven_app <- last_plot()
 
 ggsave(
-    "out/appendix-6.png" %>% lp, 
-    six_app, width = 6, height = 4.5,
+    "out/appendix-7.png" %>% lp, 
+    seven_app, width = 6, height = 4.5,
     type = "cairo-png"
 )
 
 
 
-# appendix seven -- sensitivity check for age boundary 50 vs 40 ------------
+# appendix eight -- sensitivity check for age boundary 50 vs 40 ------------
 load("dat/df_40_50.rda" %>% lp)
 
 df40 %>% ggplot()+
@@ -964,57 +1015,6 @@ df40 %>% ggplot()+
          color = "Age group",
          title = "Average contribution per year of age in the age group")
 
-
-seven_app <- last_plot()
-
-ggsave(
-    "out/appendix-7.png" %>% lp, 
-    seven_app, width = 8, height = 10,
-    type = "cairo-png"
-)
-
-
-
-# appendix eight -- change of gap decomposition ---------------------------
-
-load("dat/df_gap_decomp.rda" %>% lp)
-
-df_gap_decomp %>% 
-    ggplot(aes(ctb, age_group))+
-    geom_vline(
-        xintercept = 0, size = .5, color = "#999999"
-    )+
-    geom_text(
-        data = . %>% filter(period == "early"),
-        aes(label = year_label %>% str_wrap(5), color = period), 
-        family = font_rc, fontface = 2,
-        x = 1.5, y = 1.75, size = 4, lineheight = .9, alpha = .1
-    )+
-    geom_text(
-        data = . %>% filter(period == "late"),
-        aes(label = year_label %>% str_wrap(5), color = period), 
-        family = font_rc, fontface = 2,
-        x = -1.5, y = 1.75, size = 4, lineheight = .9, alpha = .1
-    )+
-    geom_col(
-        aes(fill = period, color = period),
-        stat="identity", position="dodge", color = NA, width =.5
-    )+
-    facet_wrap(~name, ncol = 5, dir = "v")+
-    scale_fill_manual(values = c("#003737FF", "#3FB3F7FF"))+
-    scale_color_manual(values = c("#003737FF", "#3FB3F7FF"))+
-    theme_minimal(base_family = font_rc, base_size = 14)+
-    theme(
-        legend.position = "none",
-        panel.grid.minor =  element_blank(),
-        panel.grid.major =  element_line(size = .1),
-        panel.ontop = T
-    )+
-    labs(
-        y = "Age group, years",
-        x = "Absolute contribution, years",
-        title = "Age-specific contributions to the change in the sex gap in life expectancy at birth" %>% str_wrap(60)
-    )
 
 eight_app <- last_plot()
 

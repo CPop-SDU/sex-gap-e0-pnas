@@ -124,81 +124,7 @@ save(qxdiff, file = "dat/qxdiff.rda" %>% lp)
 
 
 
-# data for sens plateau 0.7 -----------------------------------------------
-
-load("dat/decomp.rda" %>% lp)
-load("dat/decomp_de_07.rda" %>% lp)
-
-df_plateau <- decomp %>% 
-    filter(country == "DEU") %>% 
-    bind_rows(decomp_de_07, .id = "plateau") %>%
-    mutate(
-        plateau = plateau %>% as_factor() %>% 
-            lvls_revalue(c("plateau=1", "plateau=0.7")),
-        age_group = age %>% 
-            cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE)
-    ) %>% 
-    group_by(plateau, country, year, age_group) %>% 
-    summarise(ctb = ctb %>% sum(na.rm = T),
-              rel_ctb = rel_ctb %>% sum(na.rm = T) %>% multiply_by(100)) %>% 
-    ungroup() %>% 
-    # relevel age_group factor
-    mutate(
-        age_group = age_group %>% 
-            str_replace(",", "-") %>% 
-            as_factor() %>% 
-            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
-    ) %>% 
-    pivot_longer(contains("ctb"), names_to = "type") %>% 
-    mutate(
-        type = type %>% as_factor %>% 
-            lvls_revalue(
-                c("absolute, years", "relative, %")
-            )
-    )
-
-
-save(df_plateau, file = "dat/df_plateau.rda" %>% lp)
-
-
-# appendix seven -- sensitivity check for age boundary 50 vs 40 ------------
-
-load("dat/gap33cntrs.rda" %>% lp)
-
-df40 <- df %>% 
-    mutate(age_group = age %>% 
-               cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE)) %>% 
-    group_by(country, name, row, column, year, age_group) %>% 
-    summarise(ctb = ctb %>% sum(na.rm = T),
-              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
-    ungroup() %>% 
-    # relevel age_group factor
-    mutate(
-        age_group = age_group %>% 
-            str_replace(",", "-") %>% 
-            as_factor() %>% 
-            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
-    )
-
-df50 <- df %>% 
-    mutate(age_group = age %>% 
-               cut(c(0, 1, 15, 50, 60, 80, 111), right = FALSE)) %>% 
-    group_by(country, name, row, column, year, age_group) %>% 
-    summarise(ctb = ctb %>% sum(na.rm = T),
-              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
-    ungroup() %>% 
-    # relevel age_group factor
-    mutate(
-        age_group = age_group %>% 
-            str_replace(",", "-") %>% 
-            as_factor() %>% 
-            lvls_revalue(c("0", "1-14", "15-49", "50-59", "60-79", "80+"))
-    )
-
-save(df40, df50, file = "dat/df_40_50.rda" %>% lp)
-
-
-# appendix eight -- decomp changes in the sex gap ----------------
+# appendix six -- decomp changes in the sex gap ----------------
 
 load("dat/gap_decomp.rda" %>% lp)
 load("dat/years_max_gap.rda" %>% lp)
@@ -237,3 +163,77 @@ df_gap_decomp <- gap_decomp %>%
     left_join(ids)
 
 save(df_gap_decomp, file = "dat/df_gap_decomp.rda" %>% lp)
+
+
+# appendix seven -- data for sens plateau 0.7 ---------------------
+
+load("dat/decomp.rda" %>% lp)
+load("dat/decomp_de_07.rda" %>% lp)
+
+df_plateau <- decomp %>% 
+    filter(country == "DEU") %>% 
+    bind_rows(decomp_de_07, .id = "plateau") %>%
+    mutate(
+        plateau = plateau %>% as_factor() %>% 
+            lvls_revalue(c("plateau=1", "plateau=0.7")),
+        age_group = age %>% 
+            cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE)
+    ) %>% 
+    group_by(plateau, country, year, age_group) %>% 
+    summarise(ctb = ctb %>% sum(na.rm = T),
+              rel_ctb = rel_ctb %>% sum(na.rm = T) %>% multiply_by(100)) %>% 
+    ungroup() %>% 
+    # relevel age_group factor
+    mutate(
+        age_group = age_group %>% 
+            str_replace(",", "-") %>% 
+            as_factor() %>% 
+            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
+    ) %>% 
+    pivot_longer(contains("ctb"), names_to = "type") %>% 
+    mutate(
+        type = type %>% as_factor %>% 
+            lvls_revalue(
+                c("absolute, years", "relative, %")
+            )
+    )
+
+
+save(df_plateau, file = "dat/df_plateau.rda" %>% lp)
+
+
+# appendix eight -- sensitivity check for age boundary 50 vs 40 ------------
+
+load("dat/gap33cntrs.rda" %>% lp)
+
+df40 <- df %>% 
+    mutate(age_group = age %>% 
+               cut(c(0, 1, 15, 40, 60, 80, 111), right = FALSE)) %>% 
+    group_by(country, name, row, column, year, age_group) %>% 
+    summarise(ctb = ctb %>% sum(na.rm = T),
+              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
+    ungroup() %>% 
+    # relevel age_group factor
+    mutate(
+        age_group = age_group %>% 
+            str_replace(",", "-") %>% 
+            as_factor() %>% 
+            lvls_revalue(c("0", "1-14", "15-39", "40-59", "60-79", "80+"))
+    )
+
+df50 <- df %>% 
+    mutate(age_group = age %>% 
+               cut(c(0, 1, 15, 50, 60, 80, 111), right = FALSE)) %>% 
+    group_by(country, name, row, column, year, age_group) %>% 
+    summarise(ctb = ctb %>% sum(na.rm = T),
+              ctb_rel = rel_ctb %>% sum(na.rm = T)) %>% 
+    ungroup() %>% 
+    # relevel age_group factor
+    mutate(
+        age_group = age_group %>% 
+            str_replace(",", "-") %>% 
+            as_factor() %>% 
+            lvls_revalue(c("0", "1-14", "15-49", "50-59", "60-79", "80+"))
+    )
+
+save(df40, df50, file = "dat/df_40_50.rda" %>% lp)
